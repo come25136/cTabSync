@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#f7b462">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>cTabSync</title>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+  <style>
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background-color: #f7b462; 
+  }
+
+  #max-size {
+    position: absolute;
+    margin: 0 10vw;
+    height: 80vh;
+    width: 80vw;
+
+    overflow: auto;
+  }
+
+  #tab_list {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+
+    -webkit-box-lines:multiple;
+    -moz-box-lines:multiple;
+    -webkit-flex-wrap:wrap;
+    -moz-flex-wrap:wrap;
+    -ms-flex-wrap:wrap;
+    flex-wrap:wrap;
+
+    position: absolute;
+
+    cursor: pointer;
+
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  #tab_list spam {
+    margin: 6px;
+
+    overflow: hidden;
+    border-radius: 20%;
+
+    height: 48px;
+    width: 48px;
+  }
+
+  #tab_list spam img {
+    width: 100%;
+  }
+
+  #tab_title {
+    position: absolute;
+    bottom: 5vh;
+    left: 10vw;
+
+    border-radius: 10px;
+
+    height: 10vh;
+    width: 80vw;
+
+    background-color: rgba(255, 255, 255, 0.5);
+
+    overflow: auto;
+
+    padding: 10px;
+  }
+
+  #tab_title a {
+    font-size: 1.2em;
+  }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+  $(function(){
+    var $tab_list = $('#tab_list');
+    var $tab_title = $('#tab_title');
+
+    var socketio = io.connect('wss://<%= domain %>');
+    var mobile
+
+    var ua = navigator.userAgent;
+    (ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || ua.indexOf('iPad') > 0 || ua.indexOf('Android') > 0 && ua.indexOf('Mobile') > 0) ? mobile = true : mobile = false;
+
+    connected();
+
+    function connected() {
+      socketio.emit("connected", { "name": "<%= user %>" });
+    }
+
+    socketio.on("reconnected", function() {
+       connected();
+    });
+
+    socketio.on("push", function (data) {
+      $tab_list.empty();
+      for (i = 0; i < data.tabs.length; i++) {
+        var color = "";
+        if (data.tabs[i][2] === "") color = '#'+Math.floor(Math.random()*16777215).toString(16);
+
+        $tab_list.append(`<spam data-title="${data.tabs[i][0]}" data-link="${data.tabs[i][1]}" style="background-color:${color}"><img src="${data.tabs[i][2]}"></spam>`);
+      }
+      apply();
+    });
+
+    $(window).on('resize', function () {
+      apply()
+    });
+
+    function apply() {
+      $tab_list.css('top', $tab_list.parent().height() / 2 - $tab_list.height() / 2 + 'px');
+      $tab_list.css('left', ($tab_list.parent().width() / 2) - ($tab_list.width() / 2) + 'px');
+    }
+    
+    $(document).on('tap click', '#tab_list > spam', function() { if (!mobile) window.open($(this).data('link')); });
+    $(document).on('tap mouseover', '#tab_list > spam', function() { $tab_title.html(`<a href="${$(this).data('link')}" target="_blank">${$(this).data('title')}</a>`); });
+  });
+  </script>
+</head>
+<body>
+  <div id="max-size"><div id="tab_list"></div></div>
+  <div id="tab_title"></div>
+</body>
+</html>

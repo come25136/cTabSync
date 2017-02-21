@@ -1,0 +1,30 @@
+{
+  "name": "ctabsync",
+  "version": "1.0.0",
+  "description": "タブ同期システム(ホストpcで開いているタブを他の端末で見れるだけ)",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/come25136/cTabSync.git"
+  },
+  "keywords": [
+    "tab",
+    "sync"
+  ],
+  "author": "come25136",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/come25136/cTabSync/issues"
+  },
+  "homepage": "https://github.com/come25136/cTabSync#readme",
+  "dependencies": {
+    "config": "^1.25.1",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.5",
+    "express": "^4.14.1",
+    "express-session": "^1.15.1",
+    "passport": "^0.3.2",
+    "passport-twitter": "^1.0.4",
+    "socket.io": "^1.7.2"
+  }
+}

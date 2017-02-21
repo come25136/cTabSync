@@ -1,0 +1,20 @@
+{
+    "server": {
+        "name": "",
+        "version": "",
+        "domain": "",
+        "port": "",
+        "rpport": "Rivers proxy port",
+        "secret": "session encrypt key"
+    },
+    "api-keys": {
+        "twitter": {
+            "ck": "Consumer Key (API Key)",
+            "cs": "Consumer Secret (API Secret)"
+        }
+    },
+    "certs": {
+        "key": "SSL",
+        "cert": ""
+    }
+}

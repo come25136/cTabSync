@@ -71,20 +71,24 @@ app.get('/',
 var tabs = {}, userHash = {};
 
 io.sockets.on('connection', function (socket) {
-  socket.on('connected', function (data) {
-    userHash[socket.id] = { 'name': data.name };
-    socket.join(data.name);
+  socket.emit('connect');
 
-    if (tabs[userHash[socket.id]['name']]) io.sockets.in(userHash[socket.id]['name']).emit('push', { 'tabs': tabs[userHash[socket.id]['name']] });
-    if (data.tabs) tabs[userHash[socket.id]['name']] = data.tabs;
+  socket.on('connected', function (data) {
+    if (data.name) {
+      console.log(data.name);
+
+      userHash[socket.id] = { 'name': data.name };
+      socket.join(data.name);
+
+      if (tabs[userHash[socket.id]['name']]) socket.emit('push', { 'tabs': tabs[userHash[socket.id]['name']] });
+      if (data.tabs) tabs[userHash[socket.id]['name']] = data.tabs;
+    } else {
+      socket.disconnect();
+    }
   });
 
   socket.on('push', function (data) {
-    if (userHash[socket.id]) {
-      io.sockets.in(userHash[socket.id]['name']).emit('push', { 'tabs': data.tabs });
-      tabs[userHash[socket.id]['name']] = data.tabs;
-    } else {
-      io.sockets.in(socket.id).emit('reconnected');
-    }
+    io.to(userHash[socket.id]['name']).emit('push', { 'tabs': data.tabs });
+    tabs[userHash[socket.id]['name']] = data.tabs;
   });
 });

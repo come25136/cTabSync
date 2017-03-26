@@ -14,13 +14,10 @@ const
       key: fs.readFileSync(config.get('certs.key')),
       cert: fs.readFileSync(config.get('certs.cert'))
     }, app)
-    .listen(process.env.PORT || config.get('server.port'), function () {
+    .listen(process.env.PORT || 3000, function () {
       console.log(`${config.get('server.name')} server | port: ${this.address().port}`);
     }),
   io = require('socket.io').listen(sslserver);
-
-var rport;
-config.get('server.rpport') ? rport = config.get('server.rpport') : rport = config.get('server.port');
 
 app.engine('ejs', ejs.renderFile);
 app.use(express.static('views'));
@@ -39,7 +36,7 @@ passport.deserializeUser(function (user, done) { done(null, user); });
 passport.use(new TwitterStrategy({
   consumerKey: config.get('api-keys.twitter.ck'),
   consumerSecret: config.get('api-keys.twitter.cs'),
-  callbackURL: `https://${config.get('server.domain')}:${rport}/auth/twitter/callback`
+  callbackURL: `https://${config.get('server.domain')}/auth/twitter/callback`
 },
   function (token, tokenSecret, profile, done) {
     done(null, profile['_json']['screen_name']);
@@ -61,7 +58,7 @@ app.get('/',
       res.redirect("/auth/twitter");
     } else {
       res.render('index.ejs', {
-        domain: req.headers.host,
+        domain: config.get('server.domain'),
         user: req.user
       });
     }
@@ -75,8 +72,6 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('connected', function (data) {
     if (data.name) {
-      console.log(data.name);
-
       userHash[socket.id] = { 'name': data.name };
       socket.join(data.name);
 

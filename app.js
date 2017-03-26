@@ -83,7 +83,11 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('push', function (data) {
-    io.to(userHash[socket.id]['name']).emit('push', { 'tabs': data.tabs });
-    tabs[userHash[socket.id]['name']] = data.tabs;
+    if (userHash[socket.id]['name']) {
+      io.to(userHash[socket.id]['name']).emit('push', { 'tabs': data.tabs });
+      tabs[userHash[socket.id]['name']] = data.tabs;
+    } else {
+      socket.emit('connect');
+    }
   });
 });
